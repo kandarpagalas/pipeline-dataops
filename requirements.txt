@@ -1,0 +1,18 @@
+# Análise de dados
+pandas
+SQLAlchemy
+psycopg2-binary
+
+# Geral
+python-dotenv
+pendulum
+
+# Dados
+Faker
+
+# Frontend
+streamlit
+watchdog
+
+# Minio
+boto3
