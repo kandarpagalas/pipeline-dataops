@@ -6,12 +6,12 @@ load_env()
 st.set_page_config(layout="wide")
 
 dash_01 = st.Page(
-    title="Dashboard 1",
+    title="Itens",
     icon=":material/download:",
     page="src/pages/dash_01.py",
 )
 dash_02 = st.Page(
-    title="Dashboard 2",
+    title="Vendas",
     icon=":material/publish:",
     page="src/pages/dash_02.py",
 )

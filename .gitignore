@@ -8,3 +8,11 @@ src/helpers
 # data/datasets
 data/volumes
 
+logs
+plugins
+postgres-db-volume
+config
+dags
+datashare
+
+Archive.zip

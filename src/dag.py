@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import sys
 from pendulum import datetime, duration
-from airflow.sdk import DAG, dag, task
+from airflow import DAG
+from airflow.decorators import dag, task
+
+# from airflow.sdk import DAG, dag, task
 
 # from airflow.models import Variable
 
@@ -20,7 +23,7 @@ default_args = {
 }
 
 
-@dag(
+with DAG(
     dag_id="PIPELINE_DE_DADOS",
     schedule="10 5 * * *",  # Todo dia as 5h
     start_date=datetime(2025, 5, 1, tz="America/Fortaleza"),
@@ -29,28 +32,25 @@ default_args = {
     tags=["MinIO", "Postgres"],
     default_args=default_args,
     catchup=False,
-)
-def pipeline_dataops():
-    # with DAG(
-    # ) as dag:
+) as dag:
 
     @task
     def data_ingestion():
-        from src.ingest import get_json_data_from_minio
+        from ingest import get_json_data_from_minio
 
         raw_data = get_json_data_from_minio()
         return raw_data
 
     @task
     def data_transformation(raw_data):
-        from src.transform import transform
+        from transform import transform
 
         df = transform(raw_data)
         return df
 
     @task
     def data_load(df):
-        from src.load import load_to_postgres
+        from load import load_to_postgres
 
         load_to_postgres(df)
 

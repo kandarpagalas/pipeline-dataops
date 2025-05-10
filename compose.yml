@@ -1,43 +1,6 @@
 ---
-
-
 services:
-  kafka:
-    image: apache/kafka:latest
-    container_name: kafka
-    restart: unless-stopped
-    ports:
-      - 9092:19092
-    env_file:
-      - .env
-    # volumes:
-    #   - ./data/volumes/kafka/logs:/tmp/kraft-combined-logs
-      # - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_CREATE_TOPICS: "orders"
-
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,CONNECTIONS_FROM_HOST://localhost:19092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONNECTIONS_FROM_HOST://localhost:19092,CONTROLLER://kafka:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      # KAFKA_NUM_PARTITIONS: 3
-
-      KAFKA_LOG_RETENTION_HOURS: 1
-      KAFKA_LOG_RETENTION_BYTES: 4073741824
-      KAFKA_LOG_SEGMENT_BYTES: 1073741824
-      # KAFKA_RETENTION_CHECK_INTERVAL_MS: 300000
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-
-  postgres:
+  postgres_z:
     container_name: postgres_z106
     image: postgres:14-alpine
     restart: unless-stopped
@@ -68,45 +31,5 @@ services:
       - ./data/volumes/minio/data:/data
       command: server /data --console-address ":9001"
   
-  producer:
-    build:
-      context: .  # This should be the root directory of your project
-      dockerfile: docker/python-kafka/Dockerfile  # Path to your Dockerfile
-    image: python/kafka  # Name the image "my_image"
-    container_name: producer_orders
-    depends_on:
-      - kafka
-    volumes:
-      - ./:/app
-    environment:
-      KAFKA_TOPIC: orders
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      # LIMIT_NUM_ORDERS: 100 # Limita a quandidade de vendas produzidas
-      PRODUCER_MAX_INTERVAL: 2 # Limita o intervalo entre vendas
-    command: ["python3", "src/streaming/producers/orders_producers.py"]
 
-
-  # painel:
-  #   build:
-  #     context: .  # This should be the root directory of your project
-  #     dockerfile: docker/streamlit-spark/Dockerfile  # Path to your Dockerfile
-  #   image: streamlit/spark  # Name the image "my_image"
-  #   # image: apache/spark-py:v3.4.0
-  #   container_name: painel
-  #   networks:
-  #     - z106-net
-  #   ports:
-  #     - 8501:8501
-  #   volumes:
-  #     - ./:/opt/bitnami/streamlit
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     DOCKER_CONTAINER: true
-  #     PRODUCER_MAX_INTERVAL: ""
-  #   depends_on:
-  #     - kafka
-  #   # command: ["streamlit", "run", "src/pages/kafka_orders_producer_gui.py", "--server.port=8501", "--server.address=0.0.0.0"]
-
-
-
+  

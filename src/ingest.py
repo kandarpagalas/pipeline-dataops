@@ -1,14 +1,16 @@
 import os
 import json
 import boto3
+import tempfile
 from botocore.client import Config
 import pandas as pd
+from datetime import datetime
 
 
 def get_json_data_from_minio():
     # Configurações do MinIO
     MINIO_ENDPOINT = os.getenv(
-        "MINIO_ENDPOINTs", "http://localhost:9000"
+        "MINIO_ENDPOINTs", "http://minio:9000"
     )  # ou o IP/host do seu servidor MinIO
 
     # Deve gerar uma nova Cresencial no 1o acesso ao minio
@@ -54,32 +56,23 @@ def get_json_data_from_minio():
         json_data = json.loads(json_bytes.decode("utf-8"))
         orders_dataset.append(json_data)
 
-        # print(json_data.keys())
+    with tempfile.NamedTemporaryFile(
+        mode="w+", suffix=".json", delete=True
+    ) as temp_json:
+        json.dump(orders_dataset, temp_json, indent=4)
+        temp_json.flush()  # Garante que os dados estejam salvos
 
-        customer = json_data.get("customer", "")
-        charges = json_data.get("charges", "")
-        items = json_data.get("items", "")
-        shipping = json_data.get("shipping", "")
+        order_id = datetime.now().strftime("YYYYMMDD")
+        file_key = f"ingest/{order_id}.json"
+        temp_json_path = temp_json.name
 
-        charge = charges[0]
-        # Transformar cada item em uma linha
-        for item in items:
+        try:
+            # Upload do arquivo
+            s3.upload_file(temp_json_path, "staging", file_key)
+        except Exception as e:
+            print(f"Erro ao enviar o arquivo: {e}")
 
-            data = {
-                "obj_key": key,
-                "order_id": json_data["id"],
-                "customer_id": customer["id"],
-                "charge_id": charge["id"],
-                "item_id": item["reference_id"],
-                "item_price": item["unit_price"],
-                "item_qtd": item["quantity"],
-                "shipping_region_code": shipping["region_code"],
-                "charge_paid": round(charge["amount"]["summary"]["paid"], 2),
-                "charge_payment_method": charge["payment_method"]["type"],
-            }
-
-            full_dataset.append(data)
-    return orders_dataset
+    return file_key
 
     return pd.DataFrame(full_dataset)
 

@@ -1,0 +1,7 @@
+pages
+helpers
+ingest.py
+load.py
+pipeline.py
+pre_carga_minio.py
+transform.py
