@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 import streamlit as st
 import matplotlib.pyplot as plt
 
-st.title("dash_02")
+st.title("VALOR DE VENDAS")
 
 # Inicializa a conexão
 conn = st.connection("postgresql", type="sql")
@@ -24,23 +24,19 @@ agrupado = df.groupby("shipping_region_code")["charge_paid"].sum().reset_index()
 agrupado = agrupado.sort_values(by="charge_paid", ascending=False)
 
 st.header(("Total de Vendas por Região de Envio"))
-# Criar a figura
-fig, ax = plt.subplots(figsize=(10, 6))
-
-# Plotar as barras
-ax.bar(
-    agrupado["shipping_region_code"], agrupado["charge_paid"], color="cornflowerblue"
+st.bar_chart(
+    data=agrupado,
+    x="shipping_region_code",
+    y="charge_paid",
+    x_label="Código de Região",
+    y_label="Total Pago (charge_paid)",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
 )
-
-# Personalizações
-ax.set_xlabel("Shipping Region Code")
-ax.set_ylabel("Total Pago (charge_paid)")
-ax.set_title("Total de Vendas por Região de Envio")
-ax.tick_params(axis="x", rotation=45)
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
 
 
 # Garantir que charge_paid seja numérico (caso necessário)
@@ -60,22 +56,19 @@ pivotado = agrupado.pivot(
 
 
 st.header("Total de Vendas por Região de Envio e Método de Pagamento")
-# Criar a figura e o eixo
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar gráfico de barras agrupadas
-pivotado.plot(kind="bar", ax=ax)
-
-# Personalizações
-ax.set_xlabel("Shipping Region Code")
-ax.set_ylabel("Total Pago (charge_paid)")
-ax.set_title("Total de Vendas por Região de Envio e Método de Pagamento")
-ax.tick_params(axis="x", rotation=45)
-ax.legend(title="Método de Pagamento")
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
+st.bar_chart(
+    data=pivotado,
+    # x="shipping_region_code",
+    # y="total_orders",
+    x_label="Código de Região",
+    y_label="Total Pago (charge_paid)",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
+)
 
 
 # Converter 'created_at' para datetime
@@ -95,25 +88,17 @@ agrupado.columns = ["Mês", "Total Pago"]
 agrupado = agrupado.sort_values(by="Mês")
 
 st.header("Total de Vendas por Mês")
-
-# Criar a figura e o eixo
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar gráfico de linha
-ax.plot(
-    agrupado["Mês"], agrupado["Total Pago"], marker="o", linestyle="-", color="orange"
+st.line_chart(
+    data=agrupado,
+    x="Mês",
+    y="Total Pago",
+    x_label="Mês",
+    y_label="Total de Vendas (charge_paid)",
+    color=None,
+    width=None,
+    height=None,
+    use_container_width=True,
 )
-
-# Personalizações
-ax.set_xlabel("Mês")
-ax.set_ylabel("Total de Vendas (charge_paid)")
-ax.set_title("Total de Vendas por Mês")
-ax.tick_params(axis="x", rotation=45)
-ax.grid(True)
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
 
 
 # Agrupar por item_categoria e somar charge_paid
@@ -126,21 +111,16 @@ agrupado.columns = ["Item Categoria", "Total Pago (charge_paid)"]
 agrupado = agrupado.sort_values(by="Total Pago (charge_paid)", ascending=False)
 
 st.header("Total Pago por Categoria de Item")
-
-# Criar a figura e o eixo
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar gráfico de barras
-ax.bar(
-    agrupado["Item Categoria"], agrupado["Total Pago (charge_paid)"], color="seagreen"
+st.bar_chart(
+    data=agrupado,
+    x="Item Categoria",
+    y="Total Pago (charge_paid)",
+    x_label="Item Categoria",
+    y_label="Total Pago (charge_paid)",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
 )
-
-# Personalizações
-ax.set_xlabel("Item Categoria")
-ax.set_ylabel("Total Pago (charge_paid)")
-ax.set_title("Total Pago por Categoria de Item")
-ax.tick_params(axis="x", rotation=45)
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)

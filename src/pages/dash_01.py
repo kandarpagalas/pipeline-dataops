@@ -4,23 +4,7 @@ from sqlalchemy import create_engine
 import streamlit as st
 import matplotlib.pyplot as plt
 
-st.title("dash_01")
-
-# # 🔧 Configurações de conexão
-# usuario = os.getenv("POSTGRES_USERs", "postgres")
-# senha = os.getenv("POSTGRES_PASSWORDs", "z111pass")
-# host = os.getenv("POSTGRES_HOSTs", "localhost")
-# porta = os.getenv("POSTGRES_PORTs", "35432")
-# banco = os.getenv("POSTGRES_DBs", "z111")
-
-# # 🛠️ Criação da string de conexão
-# conn_str = f"postgresql+psycopg2://{usuario}:{senha}@{host}:{porta}/{banco}"
-# engine = create_engine(conn_str)
-
-# tabela = "ORDERS"
-# df = pd.read_sql(f"SELECT * FROM {tabela}", engine)
-# st.write(f"Dados da tabela '{tabela}' lidos com sucesso:")
-
+st.title("QUANTIDADE DE VENDAS")
 
 # Inicializa a conexão
 conn = st.connection("postgresql", type="sql")
@@ -32,10 +16,6 @@ query = """SELECT * FROM "ORDERS";"""
 df = conn.query(query, ttl="10m")  # usa cache por 10 minutos
 # df2 = pd.read_sql(query, conn.engine)
 
-# Mostra os dados
-# st.dataframe(df)
-# st.dataframe(df1)
-# st.dataframe(df2)
 # Agrupamento por shipping_region_code e contagem de order_id
 agrupado = df.groupby("shipping_region_code")["order_id"].count().reset_index()
 
@@ -43,17 +23,20 @@ agrupado = df.groupby("shipping_region_code")["order_id"].count().reset_index()
 agrupado.columns = ["shipping_region_code", "total_orders"]
 
 st.header("Total de Pedidos por Região de Envio")
-# Criação da figura
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.bar(agrupado["shipping_region_code"], agrupado["total_orders"], color="skyblue")
-ax.set_xlabel("Shipping Region Code")
-ax.set_ylabel("Total de Pedidos (order_id)")
-ax.set_title("Total de Pedidos por Região de Envio")
-plt.xticks(rotation=45)
-plt.tight_layout()
+st.bar_chart(
+    data=agrupado,
+    x="shipping_region_code",
+    y="total_orders",
+    x_label="Shipping Region Code",
+    y_label="Total de Pedidos (order_id)",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
+)
 
-# Exibição no Streamlit
-st.pyplot(fig)
 
 # Agrupamento por shipping_region_code e charge_payment_method, contando os order_id
 agrupado = (
@@ -69,22 +52,19 @@ pivotado = agrupado.pivot(
 
 
 st.header("Total de Pedidos por Região de Envio e Método de Pagamento")
-# Criar a figura e os eixos
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar o gráfico no eixo
-pivotado.plot(kind="bar", ax=ax)
-
-# Personalizações
-ax.set_xlabel("Shipping Region Code")
-ax.set_ylabel("Total de Pedidos (order_id)")
-ax.set_title("Total de Pedidos por Região de Envio e Método de Pagamento")
-ax.tick_params(axis="x", rotation=45)
-ax.legend(title="Método de Pagamento")
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
+st.bar_chart(
+    data=pivotado,
+    # x="shipping_region_code",
+    # y="total_orders",
+    x_label="Shipping Region Code",
+    y_label="Total de Pedidos (order_id)",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
+)
 
 
 # Converter 'created_at' para datetime, considerando fuso horário
@@ -101,29 +81,17 @@ agrupado.columns = ["Mês", "Total de Pedidos"]
 agrupado = agrupado.sort_values(by="Mês")
 
 st.header("Total de Pedidos por Mês")
-
-# Criar a figura
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar a linha
-ax.plot(
-    agrupado["Mês"],
-    agrupado["Total de Pedidos"],
-    marker="o",
-    linestyle="-",
-    color="teal",
+st.line_chart(
+    data=agrupado,
+    x="Mês",
+    y="Total de Pedidos",
+    x_label="Mês",
+    y_label="Total de Pedidos (order_id)",
+    color=None,
+    width=None,
+    height=None,
+    use_container_width=True,
 )
-
-# Personalizações
-ax.set_xlabel("Mês")
-ax.set_ylabel("Total de Pedidos (order_id)")
-ax.set_title("Total de Pedidos por Mês")
-ax.tick_params(axis="x", rotation=45)
-ax.grid(True)
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
 
 
 # Garantir que 'item_qtd' seja numérico
@@ -138,19 +106,16 @@ agrupado = agrupado.sort_values(by="Total de Itens Vendidos", ascending=False)
 
 
 st.header("Total de Itens Vendidos por Categoria")
-
-# Criar a figura
-fig, ax = plt.subplots(figsize=(12, 6))
-
-# Plotar as barras
-ax.bar(agrupado["Item ID"], agrupado["Total de Itens Vendidos"], color="steelblue")
-
-# Personalizações
-ax.set_xlabel("Item Categoria")
-ax.set_ylabel("Total de Itens Vendidos")
-ax.set_title("Total de Itens Vendidos por Categoria")
-ax.tick_params(axis="x", rotation=45)
-plt.tight_layout()
-
-# Exibir no Streamlit
-st.pyplot(fig)
+st.bar_chart(
+    data=agrupado,
+    x="Item ID",
+    y="Total de Itens Vendidos",
+    x_label="Item Categoria",
+    y_label="Total de Itens Vendidos",
+    color=None,
+    horizontal=False,
+    stack=None,
+    width=None,
+    height=None,
+    use_container_width=True,
+)
